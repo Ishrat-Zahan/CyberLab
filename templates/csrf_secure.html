@@ -1,0 +1,7 @@
+<h2>CSRF (Secure)</h2>
+<form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <input name="note" placeholder="Type a note" style="width: 360px;">
+  <button type="submit">Update Note</button>
+</form>
+<p>This form includes a per-session CSRF token that is validated on submit.</p>

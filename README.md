@@ -5,6 +5,8 @@ Hands-on security lab to practice OWASP concepts using a small Flask app:
 - Vulnerable vs secure SQL queries
 - Session hijacking scenarios (weak vs secure cookies)
 - Basic attack logging and session visibility
+- XSS (vulnerable vs secure)
+- CSRF (vulnerable vs secure)
 
 ### 1) Prerequisites
 
@@ -86,13 +88,43 @@ Visibility:
 - Recent sessions: `/sessions` (JSON)
 - Attack logs: `/attack-logs` (JSON)
 
+XSS:
+- Vulnerable reflect: `/xss-vuln`
+  - Try: `<script>alert(1)</script>` or `<img src=x onerror=alert(1)>`
+- Secure reflect (escaped): `/xss-secure`
+
+CSRF:
+- Vulnerable form (no token): `/csrf-vuln`
+- Secure form (per-session token): `/csrf-secure`
+
 ### 8) Demo Users
 
 - admin / admin123 (role: admin)
 - john / john@2024 (role: user)
 - alice / alice@pass (role: user)
 
-### 9) Troubleshooting
+### 9) Burp Suite (Optional, Recommended)
+
+- Set your browser proxy to `127.0.0.1:8080` (or use Burp’s built-in browser).
+- Browse `http://127.0.0.1:5000` through Burp.
+- Practice:
+  - SQLi: Send `GET /vuln-search?q=' OR '1'='1` to Repeater, iterate payloads; compare with `/secure-search`.
+  - Auth brute/enum: Use Intruder on `POST /vuln-login` with username/password lists.
+  - Session hijack: Capture `Set-Cookie: vuln_session_id=...`, replay with a different value to `/dashboard`.
+  - CSRF: Craft a PoC HTML that auto-POSTs to `/csrf-vuln`; compare with `/csrf-secure` (token required).
+  - Logging: Watch `/attack-logs` and `/sessions` to see side effects of your traffic.
+
+### 10) WebGoat (Optional, Complementary)
+
+Run alongside this lab for guided lessons:
+
+```bash
+docker run -p 8080:8080 webgoat/webgoat
+```
+
+Open `http://127.0.0.1:8080/WebGoat` and use Burp in the middle, just like with CyberLab.
+
+### 11) Troubleshooting
 
 - database is locked:
   - Close any external DB tools (e.g., DB Browser for SQLite) that keep the file open
@@ -102,13 +134,13 @@ Visibility:
 - Windows console emoji errors:
   - Set UTF-8: `$env:PYTHONIOENCODING='utf-8'`
 
-### 10) Notes and Safety
+### 12) Notes and Safety
 
 - This lab intentionally includes insecure endpoints for learning.
 - Use only in a local, isolated environment. Do not expose to the public internet.
 - For production, always use parameterized queries, robust session management, HTTPS, CSRF protection, input validation/encoding, and least-privilege DB users.
 
-### 11) Project Structure (high level)
+### 13) Project Structure (high level)
 
 ```
 app.py            # Flask routes (vulnerable + secure demos)
@@ -119,7 +151,7 @@ static/           # (optional) static assets
 cyberlab.db       # SQLite database (created at runtime)
 ```
 
-### 12) License
+### 14) License
 
 MIT (or your chosen license)
 

@@ -1,0 +1,6 @@
+<h2>XSS (Vulnerable)</h2>
+<form method="post">
+  <input name="msg" placeholder="Type something like: <script>alert(1)</script>" style="width: 360px;">
+  <button type="submit">Echo</button>
+</form>
+<p>Tip: Also try GET: /xss-vuln?msg=&lt;img src=x onerror=alert(1)&gt;</p>

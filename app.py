@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, flash, make_response, jsonify
+from flask import Flask, render_template, request, redirect, flash, make_response, jsonify, session
+import uuid
 from auth import secure_login, vulnerable_login, get_all_sessions
 from database import get_connection
 
@@ -129,6 +130,49 @@ def secure_search():
         conn.close()
     return jsonify({"query": sql, "params": [f"%{q}%"], "result": rows})
 
+
+# 🧪 XSS Lab
+@app.route("/xss-vuln", methods=["GET", "POST"])
+def xss_vuln():
+    # Intentionally reflect unescaped content
+    msg = request.values.get("msg", "")
+    if request.method == "POST":
+        return f"<h3>Echo (vulnerable): {msg}</h3><a href='/xss-vuln'>Back</a>"
+    return render_template("xss_vuln.html")
+
+
+@app.route("/xss-secure", methods=["GET", "POST"])
+def xss_secure():
+    # Render via Jinja which escapes by default
+    msg = request.values.get("msg", "")
+    return render_template("xss_secure.html", msg=msg)
+
+
+# 🛡️ CSRF Lab
+@app.route("/csrf-vuln", methods=["GET", "POST"])
+def csrf_vuln():
+    # Simulate a sensitive action without CSRF token
+    if request.method == "POST":
+        note = request.form.get("note", "")
+        return f"<p>Note updated (vulnerable): {note}</p><a href='/csrf-vuln'>Back</a>"
+    return render_template("csrf_vuln.html")
+
+
+@app.route("/csrf-secure", methods=["GET", "POST"])
+def csrf_secure():
+    # Generate a per-session CSRF token
+    if "csrf_token" not in session:
+        session["csrf_token"] = uuid.uuid4().hex
+    csrf_token = session["csrf_token"]
+
+    if request.method == "POST":
+        sent = request.form.get("csrf_token", "")
+        if not sent or sent != csrf_token:
+            return "CSRF validation failed", 400
+        note = request.form.get("note", "")
+        return f"<p>Note updated (secure): {note}</p><a href='/csrf-secure'>Back</a>"
+
+    return render_template("csrf_secure.html", csrf_token=csrf_token)
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

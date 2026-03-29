@@ -1,0 +1,6 @@
+<h2>CSRF (Vulnerable)</h2>
+<form method="post">
+  <input name="note" placeholder="Type a note" style="width: 360px;">
+  <button type="submit">Update Note</button>
+</form>
+<p>This form has no CSRF token. Another site could auto-submit it on your behalf.</p>
